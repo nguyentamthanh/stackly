@@ -35,3 +35,19 @@ export function monthLabel(iso: string): string {
   const vn = new Date(d.getTime() + 7 * 3600 * 1000);
   return `${vn.getUTCMonth() + 1}/${vn.getUTCFullYear()}`;
 }
+
+/** Màu đường của từng kiểu đầu tư trên biểu đồ so sánh (tên biến CSS) */
+export const STRATEGY_COLOR = {
+  plain: "--muted",
+  "tich-san": "--jade",
+  "xu-huong": "--t-very-cheap",
+  "bat-day": "--t-expensive",
+} as const;
+
+/** Màu nhãn hành động: mua / giữ / chờ / bán */
+export const STANCE_COLOR = {
+  buy: "var(--up)",
+  hold: "var(--jade)",
+  wait: "var(--t-neutral)",
+  sell: "var(--down)",
+} as const;

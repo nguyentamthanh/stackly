@@ -6,6 +6,7 @@ import { backtestDca } from "@/lib/backtest";
 import { fmtDate, fmtPct, fmtVnd, fmtVndShort } from "@/lib/format";
 import type { Bar, Currency } from "@/lib/types";
 import { cx } from "@/lib/ui";
+import { MoneyInput } from "./MoneyInput";
 
 export function BacktestPanel({
   bars,
@@ -54,12 +55,9 @@ export function BacktestPanel({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <label className="flex flex-col gap-1 text-sm">
           <span className="text-muted">Tiền tích sản mỗi tháng (VND)</span>
-          <input
-            type="number"
-            min={100000}
-            step={500000}
+          <MoneyInput
             value={monthly}
-            onChange={(e) => setMonthly(Math.max(0, Number(e.target.value)))}
+            onValueChange={(v) => setMonthly(Math.max(0, Number(v) || 0))}
             className="rounded-lg border border-line bg-paper px-3 py-2 tabular-nums"
           />
         </label>

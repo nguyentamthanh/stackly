@@ -129,6 +129,14 @@ export const CLASS_LABELS: Record<AssetClass, string> = {
 
 export const CLASS_ORDER: AssetClass[] = ["vn", "us", "gold", "crypto", "savings"];
 
+export const CLASS_DESCRIPTIONS: Record<AssetClass, string> = {
+  vn: "Cổ phiếu và quỹ ETF trên sàn HOSE. Tăng trưởng theo kinh tế Việt Nam, biến động mạnh theo dòng tiền nội.",
+  us: "Quỹ ETF và cổ phiếu Mỹ, mua qua tài khoản quốc tế. Đa dạng hóa ra ngoài VND, hưởng thêm tỷ giá.",
+  gold: "Vàng miếng SJC và vàng nhẫn. Kênh giữ giá khi lạm phát hoặc khủng hoảng, không sinh dòng tiền.",
+  crypto: "Bitcoin và Ethereum. Tiềm năng lớn nhưng có thể giảm 70–80%, chỉ nên chiếm phần nhỏ.",
+  savings: "Tiền gửi ngân hàng. Quỹ dự phòng và nơi giữ tiền chờ cho mọi kiểu đầu tư khác.",
+};
+
 export function getAsset(id: string): AssetConfig | undefined {
   return ASSETS.find((a) => a.id === id);
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { backtestDca } from "@/lib/backtest";
 import { monthlyPlan, PROFILES, profileFromAnswers } from "@/lib/plan";
-import { holdingsFromTransactions, xirr, savingsValue } from "@/lib/portfolio";
+import { holdingsFromTransactions, savingsValue, valueHoldings, xirr, type Transaction } from "@/lib/portfolio";
 import type { Bar } from "@/lib/types";
 
 describe("backtestDca", () => {
@@ -115,5 +115,47 @@ describe("portfolio", () => {
 
   it("tiền gửi tiết kiệm cộng lãi đơn theo số ngày", () => {
     expect(savingsValue(100_000_000, 0.06, "2025-01-01", "2026-01-01")).toBeCloseTo(106_000_000, -3);
+  });
+});
+
+describe("valueHoldings", () => {
+  const asset = (id: string, cls: "vn" | "us" | "savings", currency: "VND" | "USD", price: number) => ({
+    id,
+    symbol: id.toUpperCase(),
+    name: id,
+    class: cls,
+    currency,
+    unit: "",
+    score: 50,
+    label: "",
+    level: "neutral" as const,
+    multiplier: 1,
+    price,
+  });
+  const assets = [asset("etf", "vn", "VND", 30_000), asset("spy", "us", "USD", 500), asset("tk", "savings", "VND", 0)];
+  const tx = (assetId: string, quantity: number, price: number, extra: Partial<Transaction> = {}): Transaction => ({
+    id: assetId + quantity,
+    assetId,
+    type: "buy",
+    date: "2026-01-01",
+    quantity,
+    price,
+    fee: 0,
+    ...extra,
+  });
+
+  it("quy USD sang VND theo tỷ giá, cổ phiếu VN giữ nguyên, tiết kiệm có lãi", () => {
+    const rows = valueHoldings([tx("etf", 100, 25_000), tx("spy", 2, 400), tx("tk", 100_000_000, 1, { rate: 0.05 })], assets, 25_000, 0.05, "2027-01-01");
+    const by = Object.fromEntries(rows.map((r) => [r.asset.id, r]));
+    expect(by.etf.valueVnd).toBe(3_000_000);
+    expect(by.etf.costVnd).toBe(2_500_000);
+    expect(by.spy.valueVnd).toBe(2 * 500 * 25_000);
+    expect(by.spy.costVnd).toBe(2 * 400 * 25_000);
+    expect(by.tk.valueVnd).toBeCloseTo(105_000_000, -3);
+  });
+
+  it("bỏ tài sản không còn trong danh sách và vị thế đã bán hết không lãi lỗ", () => {
+    const rows = valueHoldings([tx("zzz", 1, 1), tx("etf", 10, 30_000), tx("etf", 10, 30_000, { type: "sell", id: "s" })], assets, 25_000, 0.05, "2026-06-01");
+    expect(rows).toEqual([]);
   });
 });

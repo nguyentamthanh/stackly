@@ -19,10 +19,23 @@ export interface PlanState {
   picks: Partial<Record<AssetClass, string>>;
 }
 
+/** Mục tiêu tài sản 12 tháng và số dư thực tế người dùng nhập mỗi tháng */
+export interface GoalState {
+  /** Tháng bắt đầu kế hoạch, "YYYY-MM" */
+  start: string;
+  initial: number;
+  monthly: number;
+  target: number;
+  /** Số dư cuối tháng thực tế (VND), khóa "YYYY-MM" */
+  actuals: Record<string, number>;
+}
+
 export interface AppState {
   version: number;
   plan: PlanState;
   transactions: Transaction[];
+  /** Thêm sau phiên bản đầu nên có thể thiếu trong dữ liệu cũ; null = chưa đặt mục tiêu */
+  goal: GoalState | null;
 }
 
 export const DEFAULT_STATE: AppState = {
@@ -35,14 +48,30 @@ export const DEFAULT_STATE: AppState = {
     picks: { vn: "e1vfvn30", us: "spy", gold: "vang-nhan", crypto: "btc", savings: "tiet-kiem" },
   },
   transactions: [],
+  goal: null,
 };
 
 let cache: AppState | null = null;
 const listeners = new Set<() => void>();
 
+const isMonth = (x: unknown): x is string => typeof x === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(x);
+const isAmount = (x: unknown): x is number => typeof x === "number" && Number.isFinite(x) && x >= 0;
+
+/** Mục tiêu không hợp lệ bị bỏ (thành null) thay vì làm hỏng cả file sao lưu */
+function parseGoal(raw: unknown): GoalState | null {
+  if (!raw || typeof raw !== "object") return null;
+  const g = raw as Partial<GoalState>;
+  if (!isMonth(g.start) || !isAmount(g.initial) || !isAmount(g.monthly) || !isAmount(g.target)) return null;
+  const actuals: Record<string, number> = {};
+  if (g.actuals && typeof g.actuals === "object") {
+    for (const [m, v] of Object.entries(g.actuals)) if (isMonth(m) && isAmount(v)) actuals[m] = v;
+  }
+  return { start: g.start, initial: g.initial, monthly: g.monthly, target: g.target, actuals };
+}
+
 /** Kiểm tra và chuẩn hóa dữ liệu (từ localStorage hoặc file nhập vào). Ném lỗi nếu không hợp lệ. */
 export function parseState(raw: unknown): AppState {
-  if (!raw || typeof raw !== "object") throw new Error("File không đúng định dạng sao lưu của Tích Sản.");
+  if (!raw || typeof raw !== "object") throw new Error("File không đúng định dạng sao lưu của Đầu Tư.");
   const r = raw as Partial<AppState>;
   if (r.version !== VERSION) throw new Error(`Phiên bản dữ liệu không hỗ trợ: ${String(r.version)}`);
   const txs = Array.isArray(r.transactions) ? r.transactions : [];
@@ -55,6 +84,7 @@ export function parseState(raw: unknown): AppState {
     version: VERSION,
     plan: { ...DEFAULT_STATE.plan, ...(r.plan ?? {}), picks: { ...DEFAULT_STATE.plan.picks, ...(r.plan?.picks ?? {}) } },
     transactions: txs,
+    goal: parseGoal(r.goal),
   };
 }
 
@@ -124,7 +154,7 @@ export function exportState(state: AppState) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `tich-san-sao-luu-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `dau-tu-sao-luu-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }

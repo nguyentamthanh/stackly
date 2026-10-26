@@ -4,22 +4,15 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import { targetWeights, type AllocationFile } from "@/lib/allocation";
 import { CLASS_LABELS, CLASS_ORDER } from "@/lib/assets";
-import { priceVnd, type LiteAsset } from "@/lib/client-data";
+import { type LiteAsset } from "@/lib/client-data";
 import { fmtDate, fmtNum, fmtPct, fmtVnd } from "@/lib/format";
 import { PROFILES } from "@/lib/plan";
-import { holdingsFromTransactions, savingsValue, xirr, type CashFlow, type Transaction } from "@/lib/portfolio";
+import { valueHoldings, xirr, type CashFlow, type Transaction } from "@/lib/portfolio";
 import { exportState, importStateFromFile, updateState, useAppState } from "@/lib/storage";
 import type { AssetClass } from "@/lib/types";
 import { CLASS_COLOR, cx } from "@/lib/ui";
+import { MoneyInput } from "./MoneyInput";
 import { SyncPanel } from "./SyncPanel";
-
-interface Row {
-  asset: LiteAsset;
-  quantity: number;
-  costVnd: number;
-  valueVnd: number;
-  realizedVnd: number;
-}
 
 function quantityLabel(a: LiteAsset | undefined): string {
   if (!a) return "Số lượng";
@@ -52,22 +45,7 @@ export function Portfolio({
   const fxOf = (a: LiteAsset) => (a.currency === "USD" ? usdVnd : 1);
 
   // Tổng hợp nắm giữ
-  const holdings = holdingsFromTransactions(txs);
-  const rows: Row[] = [];
-  for (const h of holdings.values()) {
-    const asset = byId.get(h.assetId);
-    if (!asset) continue;
-    let valueVnd: number;
-    if (asset.class === "savings") {
-      const deposits = txs.filter((t) => t.assetId === asset.id);
-      valueVnd = deposits.reduce(
-        (a, t) => a + (t.type === "buy" ? savingsValue(t.quantity, t.rate ?? defaultSavingsRate, t.date, today) : -t.quantity),
-        0,
-      );
-    } else valueVnd = h.quantity * priceVnd(asset, usdVnd);
-    if (h.quantity <= 0 && h.realized === 0) continue;
-    rows.push({ asset, quantity: h.quantity, costVnd: h.cost * fxOf(asset), valueVnd: Math.max(0, valueVnd), realizedVnd: h.realized * fxOf(asset) });
-  }
+  const rows = valueHoldings(txs, assets, usdVnd, defaultSavingsRate, today);
   const totalValue = rows.reduce((a, r) => a + r.valueVnd, 0);
   const totalCost = rows.reduce((a, r) => a + r.costVnd, 0);
   const totalRealized = rows.reduce((a, r) => a + r.realizedVnd, 0);
@@ -384,7 +362,7 @@ function AddTransaction({ assets, defaultSavingsRate, today }: { assets: LiteAss
           <input type="date" value={date} max={today} onChange={(e) => setDate(e.target.value)} className={inputCls} required />
         </Field>
         <Field label={quantityLabel(asset)}>
-          <input type="number" inputMode="decimal" step="any" min="0" value={quantity} onChange={(e) => setQuantity(e.target.value)} className={inputCls} required />
+          <MoneyInput decimals value={quantity} onValueChange={setQuantity} className={inputCls} required />
         </Field>
         {savings ? (
           <Field label="Lãi suất (%/năm)">
@@ -392,11 +370,11 @@ function AddTransaction({ assets, defaultSavingsRate, today }: { assets: LiteAss
           </Field>
         ) : (
           <Field label={`Giá mỗi đơn vị (${asset?.currency === "USD" ? "USD" : asset?.class === "gold" ? "VND/lượng" : "VND"})`}>
-            <input type="number" inputMode="decimal" step="any" min="0" value={price} onChange={(e) => setPrice(e.target.value)} className={inputCls} required />
+            <MoneyInput decimals value={price} onValueChange={setPrice} className={inputCls} required />
           </Field>
         )}
         <Field label={`Phí (${asset?.currency ?? "VND"})`}>
-          <input type="number" inputMode="decimal" step="any" min="0" value={fee} onChange={(e) => setFee(e.target.value)} className={inputCls} />
+          <MoneyInput decimals value={fee} onValueChange={setFee} className={inputCls} />
         </Field>
         <Field label="Ghi chú (không bắt buộc)" className="sm:col-span-2 lg:col-span-1">
           <input type="text" value={note} maxLength={80} onChange={(e) => setNote(e.target.value)} className={inputCls} />

@@ -1,3 +1,5 @@
+import { priceVnd, type LiteAsset } from "./client-data";
+
 export interface Transaction {
   id: string;
   assetId: string;
@@ -79,4 +81,39 @@ export function xirr(flows: CashFlow[]): number | null {
     }
   }
   return (lo + hi) / 2;
+}
+
+export interface ValuedHolding {
+  asset: LiteAsset;
+  quantity: number;
+  /** Giá vốn còn lại quy VND */
+  costVnd: number;
+  valueVnd: number;
+  realizedVnd: number;
+}
+
+/** Định giá các khoản đang nắm giữ theo giá hiện tại, quy ra VND. Tiết kiệm tính lãi đơn đến `today`. */
+export function valueHoldings(
+  txs: Transaction[],
+  assets: LiteAsset[],
+  usdVnd: number,
+  defaultSavingsRate: number,
+  today: string,
+): ValuedHolding[] {
+  const byId = new Map(assets.map((a) => [a.id, a]));
+  const rows: ValuedHolding[] = [];
+  for (const h of holdingsFromTransactions(txs).values()) {
+    const asset = byId.get(h.assetId);
+    if (!asset) continue;
+    const fx = asset.currency === "USD" ? usdVnd : 1;
+    let valueVnd: number;
+    if (asset.class === "savings") {
+      valueVnd = txs
+        .filter((t) => t.assetId === asset.id)
+        .reduce((a, t) => a + (t.type === "buy" ? savingsValue(t.quantity, t.rate ?? defaultSavingsRate, t.date, today) : -t.quantity), 0);
+    } else valueVnd = h.quantity * priceVnd(asset, usdVnd);
+    if (h.quantity <= 0 && h.realized === 0) continue;
+    rows.push({ asset, quantity: h.quantity, costVnd: h.cost * fx, valueVnd: Math.max(0, valueVnd), realizedVnd: h.realized * fx });
+  }
+  return rows;
 }

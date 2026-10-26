@@ -8,6 +8,7 @@ import { fmtNum, fmtPct, fmtVnd } from "@/lib/format";
 import { targetWeights, type AllocationFile } from "@/lib/allocation";
 import { monthlyPlan, PROFILES, profileFromAnswers, QUIZ, type ProfileId } from "@/lib/plan";
 import { FrontierChart, FrontierLegend } from "./FrontierChart";
+import { MoneyInput } from "./MoneyInput";
 import { updateState, useAppState } from "@/lib/storage";
 import type { AssetClass } from "@/lib/types";
 import { CLASS_COLOR, cx, LEVEL_COLOR } from "@/lib/ui";
@@ -171,13 +172,9 @@ export function PlanWizard({ assets, usdVnd, alloc }: { assets: LiteAsset[]; usd
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <label className="relative sm:w-64">
             <span className="sr-only">Ngân sách hàng tháng (VND)</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              min={0}
-              step={500000}
+            <MoneyInput
               value={plan.budget}
-              onChange={(e) => setPlan({ budget: Math.max(0, Number(e.target.value)) })}
+              onValueChange={(v) => setPlan({ budget: Math.max(0, Number(v) || 0) })}
               className="w-full rounded-lg border border-line bg-surface px-3 py-2.5 pr-12 text-lg font-semibold tabular-nums"
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted">VND</span>

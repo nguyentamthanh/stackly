@@ -6,7 +6,11 @@ import { cx } from "@/lib/ui";
 
 const LINKS = [
   { href: "/", label: "Tổng quan" },
+  { href: "/kieu-dau-tu", label: "Kiểu đầu tư" },
+  { href: "/kenh", label: "Kênh" },
+  { href: "/quy", label: "Quỹ" },
   { href: "/ke-hoach", label: "Kế hoạch" },
+  { href: "/muc-tieu", label: "Mục tiêu" },
   { href: "/danh-muc", label: "Danh mục" },
   { href: "/cong-cu", label: "Công cụ" },
 ];
@@ -19,7 +23,8 @@ export function SiteNav() {
       aria-label="Điều hướng chính"
     >
       {LINKS.map((l) => {
-        const active = l.href === "/" ? pathname === "/" || pathname.startsWith("/tai-san") : pathname.startsWith(l.href);
+        const active =
+          l.href === "/" ? pathname === "/" : l.href === "/kenh" ? pathname.startsWith("/kenh") || pathname.startsWith("/tai-san") : pathname.startsWith(l.href);
         return (
           <Link
             key={l.href}

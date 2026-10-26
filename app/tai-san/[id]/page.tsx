@@ -4,11 +4,14 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { PriceChart, ScoreChart } from "@/components/AssetCharts";
 import { BacktestPanel } from "@/components/BacktestPanel";
+import { StrategyChart } from "@/components/StrategyChart";
+import { BacktestNote, COMPARE_ROWS, PerfCell, StanceBadge, statsFor } from "@/components/StrategyBits";
 import { Change, ScoreBadge, ScoreBar, StaleNote } from "@/components/bits";
 import { ASSETS, CLASS_LABELS, getAsset } from "@/lib/assets";
 import { averageRate12m, getAssetDetail, getGoldHistory, getSavings, getSignals } from "@/lib/data";
 import { fmtDate, fmtNum, fmtPct, fmtPrice, fmtVnd } from "@/lib/format";
-import { scoreColor } from "@/lib/ui";
+import { getBoard, SAMPLE_MONTHLY, type BoardRow } from "@/lib/strategy-data";
+import { scoreColor, STRATEGY_COLOR } from "@/lib/ui";
 
 export function generateStaticParams() {
   return ASSETS.map((a) => ({ id: a.id }));
@@ -54,7 +57,7 @@ async function AssetContent({ params }: { params: PageProps<"/tai-san/[id]">["pa
   return (
     <article className="flex flex-col gap-10">
       <header className="flex flex-col gap-3">
-        <Link href={`/#${asset.class}`} className="text-sm text-muted hover:text-ink w-fit">
+        <Link href={`/kenh/${asset.class}`} className="text-sm text-muted hover:text-ink w-fit">
           ← {CLASS_LABELS[asset.class]}
         </Link>
         <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
@@ -126,6 +129,11 @@ async function AssetContent({ params }: { params: PageProps<"/tai-san/[id]">["pa
           </ul>
         </div>
       </section>
+
+      {(() => {
+        const row = getBoard().find((r) => r.asset.id === id);
+        return row && (row.trend || row.backtest) ? <StrategiesSection row={row} /> : null;
+      })()}
 
       {asset.class === "savings" ? (
         <section aria-labelledby="h-rates">
@@ -207,6 +215,63 @@ async function AssetContent({ params }: { params: PageProps<"/tai-san/[id]">["pa
         )
       )}
     </article>
+  );
+}
+
+function StrategiesSection({ row }: { row: BoardRow }) {
+  const bt = row.backtest;
+  const states = [
+    { key: "tich-san", label: "Tích sản theo điểm", node: <span className="text-sm font-semibold">{row.signal.action}</span> },
+    { key: "xu-huong", label: "Theo xu hướng", node: <StanceBadge state={row.trend} showDetail /> },
+    { key: "bat-day", label: "Bắt đáy", node: <StanceBadge state={row.dip} showDetail /> },
+  ];
+  return (
+    <section aria-labelledby="h-strategies" className="flex flex-col gap-4">
+      <h2 id="h-strategies" className="font-display text-2xl font-semibold">
+        Theo từng kiểu đầu tư
+      </h2>
+      <ul className="grid md:grid-cols-3 gap-3">
+        {states.map((s) => (
+          <li key={s.key}>
+            <Link href={`/kieu-dau-tu/${s.key}`} className="h-full flex flex-col gap-1.5 rounded-xl border border-line bg-surface p-4 hover:border-jade">
+              <span className="text-xs text-muted">{s.label}</span>
+              {s.node}
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {bt && (
+        <div className="grid lg:grid-cols-[280px_1fr] gap-6">
+          <table className="w-full text-sm self-start">
+            <caption className="text-left text-xs text-muted pb-2">Góp {fmtVnd(SAMPLE_MONTHLY)}/tháng từ {fmtDate(bt.start).slice(3)}</caption>
+            <tbody className="divide-y divide-line">
+              {COMPARE_ROWS.map((k) => (
+                <tr key={k.key}>
+                  <td className="py-2 pr-3">
+                    <span className="inline-flex items-center gap-2">
+                      <span className="inline-block w-3 border-t-2" style={{ borderColor: `var(${STRATEGY_COLOR[k.key]})` }} aria-hidden />
+                      {k.label}
+                    </span>
+                  </td>
+                  <td className="py-2 text-right">
+                    <PerfCell stats={statsFor(row, k.key)} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <StrategyChart
+            lines={COMPARE_ROWS.map((k) => ({
+              name: k.label,
+              data: k.key === "plain" ? bt.plain.series : bt.results[k.key].series,
+              color: STRATEGY_COLOR[k.key],
+              dashed: k.key === "plain",
+            }))}
+          />
+        </div>
+      )}
+      <BacktestNote />
+    </section>
   );
 }
 

@@ -7,6 +7,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { computeAllocation, toVnd } from "../lib/allocation";
+import { summarizeNav, type FundHistory, type FundHistoryFile } from "../lib/fund-history";
+import { fetchFmarketFunds, fetchFmarketNavHistory, type FundsFile } from "../lib/funds";
 import { ASSETS } from "../lib/assets";
 import { computeSignal, scoreHistory, type SignalKind } from "../lib/signals";
 import type { AssetConfig, AssetDetail, Bar, GoldQuote, MarketMeta, SavingsData, Signal, SignalsFile } from "../lib/types";
@@ -213,6 +215,37 @@ async function main() {
     }
   } catch (err) {
     warn(`Phân bổ tối ưu: ${(err as Error).message}`);
+  }
+
+  // --- Bảng xếp hạng quỹ mở (bản dự phòng khi web không gọi được Fmarket) ---
+  try {
+    const funds = await fetchFmarketFunds();
+    await writeJson(path.join(OUT, "funds.json"), { updatedAt, source: "snapshot", funds } satisfies FundsFile);
+    log(`
+Quỹ mở: ${funds.length} quỹ từ Fmarket`);
+
+    // Lịch sử NAV 14 tháng của từng quỹ → tóm tắt cho cảnh báo (giữ bản cũ của quỹ nào lỗi)
+    const old = (await readJson<FundHistoryFile>(path.join(OUT, "fund-history.json")))?.funds ?? {};
+    const history: Record<string, FundHistory> = {};
+    const to = new Date();
+    const from = new Date(to.getTime() - 430 * 86400000);
+    let failed = 0;
+    for (const f of funds) {
+      try {
+        const h = summarizeNav(await fetchFmarketNavHistory(f.id, from, to));
+        if (h) history[f.code] = h;
+        else if (old[f.code]) history[f.code] = old[f.code];
+      } catch {
+        failed++;
+        if (old[f.code]) history[f.code] = old[f.code];
+      }
+      await new Promise((r) => setTimeout(r, 120));
+    }
+    await writeJson(path.join(OUT, "fund-history.json"), { updatedAt, funds: history } satisfies FundHistoryFile);
+    log(`Lịch sử NAV: ${Object.keys(history).length}/${funds.length} quỹ${failed ? `, ${failed} lỗi` : ""}`);
+    if (failed) warn(`Lịch sử NAV: ${failed} quỹ không tải được`);
+  } catch (err) {
+    warn(`Quỹ mở: ${(err as Error).message} (giữ bản cũ)`);
   }
 
   await writeJson(path.join(OUT, "signals.json"), { updatedAt, usdVnd, signals } satisfies SignalsFile);

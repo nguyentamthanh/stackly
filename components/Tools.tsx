@@ -7,6 +7,7 @@ import { fmtNum, fmtPct, fmtVnd, fmtVndShort } from "@/lib/format";
 import type { AssetDetail } from "@/lib/types";
 import { cx } from "@/lib/ui";
 import { BacktestPanel } from "./BacktestPanel";
+import { MoneyInput } from "./MoneyInput";
 
 export interface ReturnPreset {
   label: string;
@@ -16,7 +17,7 @@ export interface ReturnPreset {
 
 const inputCls = "w-full rounded-lg border border-line bg-paper px-3 py-2 tabular-nums";
 
-function NumField({
+export function NumField({
   label,
   value,
   onChange,
@@ -35,15 +36,19 @@ function NumField({
     <label className="flex flex-col gap-1 text-sm">
       <span className="text-muted">{label}</span>
       <span className="relative">
-        <input
-          type="number"
-          inputMode="decimal"
-          value={value}
-          step={step}
-          min={min}
-          onChange={(e) => onChange(Math.max(min, Number(e.target.value)))}
-          className={cx(inputCls, suffix && "pr-14")}
-        />
+        {suffix === "VND" ? (
+          <MoneyInput value={value} onValueChange={(v) => onChange(Math.max(min, Number(v) || 0))} className={cx(inputCls, "pr-14")} />
+        ) : (
+          <input
+            type="number"
+            inputMode="decimal"
+            value={value}
+            step={step}
+            min={min}
+            onChange={(e) => onChange(Math.max(min, Number(e.target.value)))}
+            className={cx(inputCls, suffix && "pr-14")}
+          />
+        )}
         {suffix && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted text-xs">{suffix}</span>}
       </span>
     </label>
