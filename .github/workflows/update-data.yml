@@ -1,0 +1,48 @@
+name: Cập nhật dữ liệu thị trường
+
+on:
+  schedule:
+    # 09:00 UTC = 16:00 giờ Việt Nam, sau phiên HOSE (thứ 2–6)
+    - cron: "0 9 * * 1-5"
+    # 22:30 UTC, sau phiên Mỹ; chạy cả cuối tuần để cập nhật crypto và vàng
+    - cron: "30 22 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Kiểm thử bộ máy chấm điểm
+        run: npm test
+
+      - name: Lấy dữ liệu và tính điểm
+        run: npm run data
+
+      - name: Commit dữ liệu mới (Vercel sẽ tự deploy lại)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data
+          if git diff --staged --quiet; then
+            echo "Không có dữ liệu mới."
+          else
+            git commit -m "data: cập nhật $(date -u +'%Y-%m-%d %H:%M') UTC"
+            git push
+          fi

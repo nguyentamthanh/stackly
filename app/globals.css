@@ -1,26 +1,120 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper: #f2f4f7;
+  --surface: #ffffff;
+  --ink: #14213d;
+  --muted: #5b6578;
+  --line: #dce1e8;
+  --jade: #1f6f5c;
+  --jade-soft: #e3f0ec;
+  --on-jade: #ffffff;
+  --up: #0e9f6e;
+  --down: #d64545;
+  /* Thang nhiệt: rẻ = mát, đắt = nóng */
+  --t-very-cheap: #2952b8;
+  --t-cheap: #4f96c4;
+  --t-neutral: #8c96a3;
+  --t-expensive: #db9a2e;
+  --t-very-expensive: #cc3f2b;
+  color-scheme: light;
+}
+
+.dark {
+  --paper: #0e1522;
+  --surface: #151f30;
+  --ink: #e5eaf2;
+  --muted: #93a0b4;
+  --line: #26334a;
+  --jade: #3fa88c;
+  --jade-soft: #173a33;
+  --on-jade: #08130f;
+  --up: #2bc48a;
+  --down: #f06464;
+  --t-very-cheap: #6b8ff2;
+  --t-cheap: #6fb4de;
+  --t-neutral: #8a95a6;
+  --t-expensive: #e8ae4a;
+  --t-very-expensive: #ee6248;
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-jade: var(--jade);
+  --color-jade-soft: var(--jade-soft);
+  --color-on-jade: var(--on-jade);
+  --color-up: var(--up);
+  --color-down: var(--down);
+  --color-t-very-cheap: var(--t-very-cheap);
+  --color-t-cheap: var(--t-cheap);
+  --color-t-neutral: var(--t-neutral);
+  --color-t-expensive: var(--t-expensive);
+  --color-t-very-expensive: var(--t-very-expensive);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--paper);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-feature-settings: "tnum" 1;
+}
+
+.thermo-strip {
+  background: linear-gradient(
+    to right,
+    var(--t-very-cheap) 0%,
+    var(--t-cheap) 25%,
+    var(--t-neutral) 50%,
+    var(--t-expensive) 75%,
+    var(--t-very-expensive) 100%
+  );
+}
+
+:focus-visible {
+  outline: 2px solid var(--jade);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+input[type="number"]::-webkit-inner-spin-button {
+  opacity: 0.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@keyframes marker-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

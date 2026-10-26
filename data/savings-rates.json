@@ -1,0 +1,17 @@
+{
+  "updatedAt": "2026-10-26",
+  "note": "Lãi suất tham khảo gửi online, cập nhật tay. Hãy kiểm tra lại trên website ngân hàng và sửa file này khi có thay đổi.",
+  "inflation": 0.035,
+  "rates": [
+    { "bank": "Vietcombank", "m6": 0.029, "m12": 0.046, "m24": 0.047 },
+    { "bank": "BIDV", "m6": 0.03, "m12": 0.047, "m24": 0.048 },
+    { "bank": "VietinBank", "m6": 0.03, "m12": 0.047, "m24": 0.048 },
+    { "bank": "Agribank", "m6": 0.03, "m12": 0.047, "m24": 0.048 },
+    { "bank": "Techcombank", "m6": 0.045, "m12": 0.0485, "m24": 0.0485 },
+    { "bank": "MB Bank", "m6": 0.042, "m12": 0.049, "m24": 0.055 },
+    { "bank": "VPBank", "m6": 0.047, "m12": 0.052, "m24": 0.052 },
+    { "bank": "ACB", "m6": 0.039, "m12": 0.047, "m24": 0.048 },
+    { "bank": "Sacombank", "m6": 0.042, "m12": 0.05, "m24": 0.052 },
+    { "bank": "HDBank", "m6": 0.053, "m12": 0.056, "m24": 0.058 }
+  ]
+}
