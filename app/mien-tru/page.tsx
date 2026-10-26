@@ -58,8 +58,13 @@ export default function DisclaimerPage() {
       <section className="flex flex-col gap-2">
         <h2 className="font-display text-xl font-semibold">Dữ liệu cá nhân</h2>
         <p>
-          Kế hoạch và giao dịch của bạn chỉ được lưu trong trình duyệt (localStorage) trên thiết bị này, không gửi về máy chủ nào. Xóa dữ
-          liệu trình duyệt sẽ xóa chúng, vì vậy hãy dùng nút “Tải file sao lưu” trong trang Danh mục.
+          Kế hoạch và giao dịch của bạn được lưu trong trình duyệt (localStorage) trên thiết bị này. Xóa dữ liệu trình duyệt sẽ xóa
+          chúng, vì vậy hãy dùng nút “Tải file sao lưu” hoặc bật đồng bộ trong trang Danh mục.
+        </p>
+        <p>
+          Khi bật đồng bộ, dữ liệu được mã hóa AES-GCM ngay trên trình duyệt bằng khóa suy ra từ mã đồng bộ của bạn, rồi mới gửi lên
+          máy chủ (cơ sở dữ liệu Neon). Máy chủ chỉ lưu bản mã hóa và một giá trị băm của mã, nên không đọc được nội dung và không khôi
+          phục được nếu bạn mất mã.
         </p>
       </section>
     </article>

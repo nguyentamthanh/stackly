@@ -11,6 +11,7 @@ import { holdingsFromTransactions, savingsValue, xirr, type CashFlow, type Trans
 import { exportState, importStateFromFile, updateState, useAppState } from "@/lib/storage";
 import type { AssetClass } from "@/lib/types";
 import { CLASS_COLOR, cx } from "@/lib/ui";
+import { SyncPanel } from "./SyncPanel";
 
 interface Row {
   asset: LiteAsset;
@@ -199,6 +200,8 @@ export function Portfolio({
       )}
 
       <AddTransaction assets={assets} defaultSavingsRate={defaultSavingsRate} today={today} />
+
+      <SyncPanel />
 
       <section aria-labelledby="h-txs">
         <div className="flex flex-wrap items-end justify-between gap-3 mb-3">

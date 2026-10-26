@@ -5,8 +5,10 @@ Web app miễn phí hỗ trợ **tích sản dài hạn** theo thời điểm. M
 - **Tài sản theo dõi:** cổ phiếu và ETF Việt Nam, cổ phiếu và ETF Mỹ, vàng SJC và vàng nhẫn, Bitcoin, Ethereum, tiết kiệm ngân hàng.
 - **Khuyến nghị dựa trên quy tắc minh bạch:** P/E VN-Index, độ lệch so với MA200, mức giảm từ đỉnh, RSI tuần, Mayer Multiple (crypto), chênh lệch vàng trong nước so với thế giới, lãi suất thực.
 - **Có backtest:** so sánh "mua đều mỗi tháng" với "mua theo điểm" trên dữ liệu lịch sử.
-- **Kế hoạch tháng:** quiz khẩu vị rủi ro → chọn tỷ trọng mục tiêu → app tính số tiền nên mua cho từng tài sản.
-- **Danh mục:** ghi giao dịch, xem lãi/lỗ, XIRR, tỷ trọng so với mục tiêu, xuất/nhập file sao lưu. Dữ liệu chỉ lưu trên trình duyệt (localStorage).
+- **Kế hoạch tháng:** quiz khẩu vị rủi ro → tỷ trọng mục tiêu → app tính số tiền nên mua cho từng tài sản.
+- **Phân bổ tối ưu (đường biên hiệu quả):** tối ưu Markowitz từ lợi nhuận và tương quan lịch sử (quy ra VND). Mỗi hồ sơ có mức biến động mục tiêu và giới hạn từng kênh; lợi nhuận kỳ vọng được co 50% về giả định dài hạn.
+- **Danh mục:** ghi giao dịch, xem lãi/lỗ, XIRR, tỷ trọng so với mục tiêu, xuất/nhập file sao lưu. Dữ liệu lưu trên trình duyệt (localStorage).
+- **Đồng bộ nhiều thiết bị bằng mã, không cần tài khoản:** dữ liệu được mã hóa AES-GCM trên trình duyệt rồi lưu vào Neon Postgres. Máy chủ chỉ thấy bản mã hóa và hash của mã.
 
 > Công cụ mang tính giáo dục, không phải lời khuyên đầu tư.
 
@@ -17,7 +19,7 @@ Web app miễn phí hỗ trợ **tích sản dài hạn** theo thời điểm. M
 | Hosting | Vercel Hobby (hoặc Cloudflare Pages) |
 | Cập nhật dữ liệu hằng ngày | GitHub Actions |
 | Dữ liệu giá | VNDirect, Yahoo Finance, PNJ, CoinGecko (API công khai) |
-| Lưu dữ liệu người dùng | localStorage trên trình duyệt |
+| Lưu dữ liệu người dùng | localStorage + Neon Postgres (gói Free, cho đồng bộ) |
 
 ## Chạy trên máy
 
@@ -33,7 +35,8 @@ npm test       # unit test bộ máy chấm điểm, backtest, kế hoạch, dan
 1. Tạo một repo trên GitHub và push code lên.
 2. Vào [vercel.com/new](https://vercel.com/new), import repo đó. Vercel tự nhận ra Next.js nên không cần cấu hình thêm.
 3. Trong repo GitHub, vào **Settings → Actions → General → Workflow permissions**, chọn **Read and write permissions** để workflow được commit dữ liệu.
-4. Vào tab **Actions**, chọn **Cập nhật dữ liệu thị trường → Run workflow** để chạy thử lần đầu.
+4. Kết nối Neon: trong project Vercel → **Storage** → **Neon** (Free), hoặc chạy `vercel integration add neon`. Sau đó chạy `vercel env pull .env.local` và `npm run db:setup` để tạo bảng.
+5. Vào tab **Actions**, chọn **Cập nhật dữ liệu thị trường → Run workflow** để chạy thử lần đầu.
 
 Từ đó trở đi, mỗi ngày workflow tự lấy giá mới, commit vào `public/data`, và Vercel tự deploy lại.
 

@@ -3,6 +3,7 @@ import { Be_Vietnam_Pro, Fraunces } from "next/font/google";
 import Link from "next/link";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SiteNav } from "@/components/SiteNav";
+import { SyncAgent } from "@/components/SyncAgent";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getSignals } from "@/lib/data";
 import { fmtDateTime } from "@/lib/format";
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="vi" suppressHydrationWarning className={`${body.variable} ${display.variable} h-full antialiased`}>
       <body suppressHydrationWarning className="min-h-full flex flex-col font-sans">
         <ThemeProvider>
+          <SyncAgent />
           <header className="border-b border-line bg-surface/80 backdrop-blur sticky top-0 z-20">
             <div className="mx-auto max-w-6xl px-4 pt-2 pb-1 sm:py-0 sm:h-14 flex flex-wrap sm:flex-nowrap items-center gap-x-4 gap-y-1">
               <Link href="/" className="font-display text-lg sm:text-xl font-semibold tracking-tight shrink-0">

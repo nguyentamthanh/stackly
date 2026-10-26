@@ -101,6 +101,19 @@ export function updateState(fn: (s: AppState) => AppState) {
   saveState(fn(getSnapshot()));
 }
 
+/** Đọc trạng thái hiện tại ngoài React (dùng cho đồng bộ). */
+export function getState(): AppState {
+  return getSnapshot();
+}
+
+/** Chỉ lắng nghe thay đổi do tab này ghi (không gồm sự kiện storage từ tab khác). */
+export function subscribeLocalChanges(cb: () => void) {
+  listeners.add(cb);
+  return () => {
+    listeners.delete(cb);
+  };
+}
+
 /** Trạng thái người dùng; null khi đang render phía server (chưa đọc được localStorage). */
 export function useAppState(): AppState | null {
   return useSyncExternalStore(subscribe, getSnapshot, () => null);
