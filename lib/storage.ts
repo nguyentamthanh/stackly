@@ -71,7 +71,7 @@ function parseGoal(raw: unknown): GoalState | null {
 
 /** Kiểm tra và chuẩn hóa dữ liệu (từ localStorage hoặc file nhập vào). Ném lỗi nếu không hợp lệ. */
 export function parseState(raw: unknown): AppState {
-  if (!raw || typeof raw !== "object") throw new Error("File không đúng định dạng sao lưu của Đầu Tư.");
+  if (!raw || typeof raw !== "object") throw new Error("File không đúng định dạng sao lưu của Stackly.");
   const r = raw as Partial<AppState>;
   if (r.version !== VERSION) throw new Error(`Phiên bản dữ liệu không hỗ trợ: ${String(r.version)}`);
   const txs = Array.isArray(r.transactions) ? r.transactions : [];
@@ -154,7 +154,7 @@ export function exportState(state: AppState) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `dau-tu-sao-luu-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `stackly-backup-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }

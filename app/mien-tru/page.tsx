@@ -10,7 +10,7 @@ export default function DisclaimerPage() {
       <section className="flex flex-col gap-2">
         <h2 className="font-display text-xl font-semibold">Không phải lời khuyên đầu tư</h2>
         <p>
-          Đầu Tư là công cụ tham khảo mang tính giáo dục. Điểm hấp dẫn và số tiền gợi ý được tính tự động bằng quy tắc cố định trên dữ
+          Stackly là công cụ tham khảo mang tính giáo dục. Điểm hấp dẫn và số tiền gợi ý được tính tự động bằng quy tắc cố định trên dữ
           liệu quá khứ, không xét đến hoàn cảnh tài chính, mục tiêu hay khả năng chịu rủi ro riêng của bạn. Đây không phải dịch vụ tư vấn
           đầu tư chứng khoán được cấp phép. Mọi quyết định và rủi ro thuộc về bạn.
         </p>

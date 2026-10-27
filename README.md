@@ -1,4 +1,4 @@
-# Đầu Tư
+# Stackly
 
 Web app miễn phí so sánh **nhiều kiểu đầu tư** trên cùng dữ liệu thị trường, chia theo **kiểu đầu tư** và theo **kênh tài sản**:
 

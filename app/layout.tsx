@@ -22,7 +22,7 @@ const display = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Đầu Tư — nhiều kiểu đầu tư, một nơi so sánh", template: "%s · Đầu Tư" },
+  title: { default: "Stackly — nhiều kiểu đầu tư, một nơi so sánh", template: "%s · Stackly" },
   description:
     "Công cụ đầu tư miễn phí: tích sản theo điểm, theo xu hướng, bắt đáy, danh mục cố định và giải ngân khoản tiền lớn cho cổ phiếu VN, cổ phiếu Mỹ, vàng, crypto và tiết kiệm.",
 };
@@ -37,7 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <header className="border-b border-line bg-surface/80 backdrop-blur sticky top-0 z-20">
             <div className="mx-auto max-w-6xl px-4 pt-2 pb-1 sm:py-0 sm:h-14 flex flex-wrap sm:flex-nowrap items-center gap-x-4 gap-y-1">
               <Link href="/" className="font-display text-lg sm:text-xl font-semibold tracking-tight shrink-0">
-                Đầu Tư
+                Stackly
               </Link>
               <SiteNav />
               <ThemeToggle />
